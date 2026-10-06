@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>背感卡</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: the page is the back of a camp T-shirt; each card is a sheet of paper taped onto it, notes are marker scribbles on the sheet. */
+:root{
+  --shirt:#2c5a68; --shirt-2:#28525f; --on-shirt:#eef5f6; --on-shirt-dim:#b3cdd3;
+  --paper:#fcfcf8; --paper-line:#e3e6e2; --ink:#23262b; --ink-dim:#6b7076;
+  --tape:rgba(236,219,168,.88); --hi:#f4c54f; --hi-ink:#2a2410; --danger:#c8283c;
+  --field:#ffffff; --field-line:#cfd6d8;
+  --hand:"LXGW WenKai TC","Kaiti TC","STKaiti","BiauKai",serif;
+  --ui:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --shirt:#13262d; --shirt-2:#112228; --on-shirt:#e3eef0; --on-shirt-dim:#8fadb4;
+  --paper:#e6e4dc; --paper-line:#d0cfc6; --ink:#1f2226; --ink-dim:#5d6268;
+  --tape:rgba(214,196,140,.8); --hi:#e9b93f; --hi-ink:#221c08; --danger:#ff6b7c;
+  --field:#f3f2ec; --field-line:#bcc3c4; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --shirt:#13262d; --shirt-2:#112228; --on-shirt:#e3eef0; --on-shirt-dim:#8fadb4;
+  --paper:#e6e4dc; --paper-line:#d0cfc6; --ink:#1f2226; --ink-dim:#5d6268;
+  --tape:rgba(214,196,140,.8); --hi:#e9b93f; --hi-ink:#221c08; --danger:#ff6b7c;
+  --field:#f3f2ec; --field-line:#bcc3c4; color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{background:var(--shirt);color:var(--on-shirt);font-family:var(--ui);font-size:15px;line-height:1.6;
+  background-image:repeating-linear-gradient(45deg,var(--shirt-2) 0 1px,transparent 1px 5px),repeating-linear-gradient(-45deg,var(--shirt-2) 0 1px,transparent 1px 5px)}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:28px 64px}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:24px}
+h1{font-family:var(--hand);font-weight:700;font-size:clamp(2rem,6vw,3.2rem);line-height:1.1;margin:0;letter-spacing:.04em;text-wrap:balance}
+.sub{margin:6px 0 0;color:var(--on-shirt-dim);max-width:34em}
+.btn{border:0;border-radius:6px;padding:9px 16px;background:var(--hi);color:var(--hi-ink);font-weight:700}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--on-shirt);border:1.5px solid var(--on-shirt-dim);font-weight:500}
+.btn.small{padding:5px 12px;font-size:13px}
+.banner{background:rgba(0,0,0,.22);border-left:4px solid var(--hi);padding:10px 14px;border-radius:4px;margin-bottom:20px;color:var(--on-shirt)}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:20px}
+.tools input{flex:1 1 200px;min-width:0}
+input[type=text],textarea{font:inherit;color:var(--ink);background:var(--field);border:1.5px solid var(--field-line);border-radius:6px;padding:8px 11px;width:100%}
+.seg{display:inline-flex;border:1.5px solid var(--on-shirt-dim);border-radius:6px;overflow:hidden}
+.seg button{background:transparent;border:0;color:var(--on-shirt);padding:6px 12px;font-size:13px}
+.seg button[aria-pressed=true]{background:var(--on-shirt);color:var(--shirt)}
+
+/* grid of backs */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:26px 20px}
+.mini{position:relative;background:var(--paper);color:var(--ink);border:0;border-radius:2px;text-align:left;padding:26px 16px 14px;min-height:150px;display:flex;flex-direction:column;gap:2px;
+  box-shadow:0 1px 0 rgba(0,0,0,.12),0 8px 18px -10px rgba(0,0,0,.55);transition:transform .15s}
+.mini:hover{transform:translateY(-3px) rotate(0deg)!important}
+.tape{position:absolute;top:-10px;left:50%;width:74px;height:22px;margin-left:-37px;background:var(--tape);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.mname{font-family:var(--hand);font-weight:700;font-size:1.6rem;line-height:1.2;word-break:break-word}
+.mmeta{font-size:12px;color:var(--ink-dim)}
+.mcount{margin-top:auto;padding-top:10px;font-size:13px;font-variant-numeric:tabular-nums;color:var(--ink-dim)}
+.mcount b{color:var(--ink);font-size:1.05rem}
+.zero{display:inline-block;background:var(--hi);color:var(--hi-ink);font-size:11px;font-weight:700;padding:1px 7px;border-radius:3px;letter-spacing:.05em}
+.team{margin-bottom:40px}
+.teamh{font-family:var(--hand);font-size:1.6rem;font-weight:700;margin:0 0 22px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;border-bottom:1.5px dashed var(--on-shirt-dim);padding-bottom:6px}
+.teamh span{font-family:var(--ui);font-size:13px;font-weight:400;color:var(--on-shirt-dim);font-variant-numeric:tabular-nums}
+.empty{text-align:center;padding:48px 16px;color:var(--on-shirt-dim)}
+.empty .big{font-family:var(--hand);font-size:1.6rem;color:var(--on-shirt);margin-bottom:6px}
+
+/* add card panel */
+.addbox{background:rgba(0,0,0,.2);border-radius:8px;padding:16px;margin-bottom:24px;display:grid;gap:10px;grid-template-columns:1fr 1fr auto;align-items:end}
+.addbox label{font-size:13px;color:var(--on-shirt-dim);display:grid;gap:4px;min-width:0}
+.addbox .err{grid-column:1/-1;color:var(--hi);font-size:13px;margin:0}
+@media (max-width:620px){.addbox{grid-template-columns:1fr}}
+
+/* card view */
+.backbar{margin-bottom:22px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:minmax(0,1fr)}}
+.sheet{position:relative;background:var(--paper);color:var(--ink);padding:40px clamp(16px,4vw,34px) 34px;min-height:420px;border-radius:2px;
+  box-shadow:0 2px 0 rgba(0,0,0,.1),0 22px 40px -22px rgba(0,0,0,.7)}
+.sheet .tape{width:110px;margin-left:-55px;top:-12px;height:26px}
+.sheet .tape.l{left:12%;transform:rotate(-38deg);width:64px;margin-left:-32px}
+.sheet .tape.r{left:88%;transform:rotate(36deg);width:64px;margin-left:-32px}
+.sheet h2{font-family:var(--hand);font-weight:700;font-size:clamp(1.8rem,5vw,2.4rem);margin:0 0 4px;text-align:center}
+.sheet .count{text-align:center;font-size:13px;color:var(--ink-dim);margin:0 0 22px}
+.notes{columns:2 220px;column-gap:26px}
+.note{break-inside:avoid;margin:0 0 22px;font-family:var(--hand);font-size:1.18rem;line-height:1.55;position:relative;display:block}
+.note p{margin:0;white-space:pre-wrap;word-break:break-word}
+.note canvas{display:block;width:100%;max-width:100%;margin-top:4px}
+.note .sig{display:block;text-align:right;font-size:.95rem;opacity:.8;margin-top:2px}
+.note .del{position:absolute;top:-6px;right:-6px;font-family:var(--ui);font-size:11px;border:0;background:var(--paper-line);color:var(--ink-dim);border-radius:3px;padding:1px 6px;opacity:0;transition:opacity .15s}
+.note:hover .del,.note:focus-within .del{opacity:1}
+.note .confirm{font-family:var(--ui);font-size:12px;display:flex;gap:6px;align-items:center;margin-top:4px;color:var(--ink)}
+.note .confirm button{border:0;border-radius:3px;padding:2px 8px;font-size:12px}
+.note .confirm .yes{background:var(--danger);color:#fff}
+.sheet .blank{text-align:center;color:var(--ink-dim);font-family:var(--hand);font-size:1.25rem;padding:50px 0}
+
+.composer{background:var(--paper);color:var(--ink);border-radius:8px;padding:18px;display:grid;gap:12px;box-shadow:0 12px 30px -18px rgba(0,0,0,.7)}
+@media (min-width:861px){.composer{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}}
+.composer h3{margin:0;font-size:15px}
+.composer textarea{min-height:96px;resize:vertical;font-family:var(--hand);font-size:1.15rem;line-height:1.5}
+.pens{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pen{width:28px;height:28px;border-radius:50%;border:3px solid var(--paper);box-shadow:0 0 0 1.5px var(--field-line)}
+.pen[aria-pressed=true]{box-shadow:0 0 0 2.5px var(--ink)}
+.lbl{font-size:12px;color:var(--ink-dim);margin-right:2px}
+.pad{position:relative;border:1.5px dashed var(--field-line);border-radius:6px;background:var(--field);overflow:hidden}
+.pad canvas{display:block;width:100%;aspect-ratio:4/3;touch-action:none;cursor:crosshair}
+.pad .hint{position:absolute;inset:0;display:grid;place-items:center;color:var(--ink-dim);font-size:13px;pointer-events:none}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row .sp{flex:1}
+.tbtn{border:1.5px solid var(--field-line);background:var(--field);color:var(--ink);border-radius:5px;padding:4px 10px;font-size:13px}
+.tbtn[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.status{font-size:13px;color:var(--ink-dim);min-height:1.2em;margin:0}
+.status.bad{color:var(--danger)}
+.composer .btn{justify-self:start}
+@media (prefers-reduced-motion:reduce){.mini,.note .del{transition:none}}
+</style>
+</head>
+<body>
+<style>
+.gate{max-width:440px;margin:40px auto 0;background:var(--paper);color:var(--ink);border-radius:4px;padding:40px 24px 28px;position:relative;box-shadow:0 22px 40px -22px rgba(0,0,0,.7);display:grid;gap:12px}
+.gate h2{font-family:var(--hand);font-size:1.7rem;margin:0;text-align:center}
+.gate p{margin:0;color:var(--ink-dim);font-size:14px;text-align:center}
+.gate .btn{justify-self:center}
+.foot{margin-top:48px;padding-top:16px;border-top:1px dashed var(--on-shirt-dim);display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13px;color:var(--on-shirt-dim)}
+.foot .sp{flex:1}
+.linkbtn{background:none;border:0;color:var(--on-shirt-dim);text-decoration:underline;padding:0;font-size:13px}
+.adminbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:rgba(0,0,0,.22);border:1.5px dashed var(--hi);border-radius:6px;padding:10px 12px;margin-bottom:20px;font-size:13px}
+.adminbar b{color:var(--hi);margin-right:4px}
+.adminlogin{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.adminlogin input{max-width:220px}
+.cardedit{display:grid;gap:8px;margin-bottom:18px;padding:12px;border:1.5px dashed var(--field-line);border-radius:6px;font-family:var(--ui)}
+.cardedit .row input{flex:1 1 140px;min-width:0}
+.btn.danger{background:var(--danger);color:#fff}
+.tbtn.danger{color:var(--danger);border-color:var(--danger)}
+</style>
+
+<div class="wrap" id="app">
+  <header class="top">
+    <div>
+      <h1>背感卡</h1>
+      <p class="sub" id="subline">找到對方的卡，在他背上留一句話或畫一張小圖。</p>
+    </div>
+    <button class="btn" id="addToggle" type="button" hidden>＋ 貼上一張新卡</button>
+  </header>
+  <div id="banner" class="banner" hidden></div>
+  <div id="adminbar"></div>
+  <div id="view"></div>
+  <footer class="foot" id="foot" hidden>
+    <span id="footInfo"></span><span class="sp"></span>
+    <span id="adminSlot"></span>
+    <button class="linkbtn" id="lockBtn" type="button">登出（清除這台裝置記住的密語）</button>
+  </footer>
+</div>
+
+<script type="module">
+import { firebaseConfig } from "./firebase-config.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, collection, doc, onSnapshot, query, where, limit, getDocs, getDoc, setDoc, writeBatch, increment, updateDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const ROSTER_ENC = "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";
+const PENS = [
+  {c:"#1f2328", n:"黑"}, {c:"#d7263d", n:"紅"}, {c:"#1b5fd1", n:"藍"},
+  {c:"#1a8a4a", n:"綠"}, {c:"#e07b00", n:"橘"}, {c:"#8e44ad", n:"紫"}
+];
+const TEAMS = ["召組","隊輔組","活動組","美宣組","生器組","攝影組"];
+const W = 600, H = 450, MAXLEN = 300;
+const LS_KEY = "backcard-pass";
+
+let fs = null, uid = null, base = "", pass = "", admin = false, unlocked = false;
+let cards = [], notes = [], ready = false, unsubCards = null, unsubNotes = null;
+let view = {name:"list"}, sortBy = "team", query_ = "", showAdd = false, addErr = "";
+let draft = {text:"", sign:"", pen:0, size:3, strokes:[], drawOpen:false, status:"", bad:false, busy:false};
+let pendingDel = null, editing = false, cardDelAsk = false;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+const hashStr = s => { let h = 0; for (const ch of s) h = (h*31 + ch.charCodeAt(0)) | 0; return Math.abs(h); };
+const tilt = id => ((hashStr(id) % 50) - 25) / 10;
+const countFor = c => Math.max(0, c.n || 0);
+const norm = p => p.replace(/\s+/g, "").replace(/!/g, "！");
+const lsGet = () => { try { return localStorage.getItem(LS_KEY) || ""; } catch { return ""; } };
+const lsSet = v => { try { v ? localStorage.setItem(LS_KEY, v) : localStorage.removeItem(LS_KEY); } catch {} };
+const P = p => base + "/" + p;
+
+function banner(msg){ const b = $("#banner"); b.hidden = !msg; b.textContent = msg || ""; }
+
+async function sha256(t){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+/* ---------- gate ---------- */
+function renderGate(msg){
+  $("#addToggle").hidden = true; $("#foot").hidden = true; $("#adminbar").innerHTML = "";
+  $("#view").innerHTML = `
+    <form class="gate" id="gate" autocomplete="off">
+      <span class="tape"></span>
+      <h2>請說出通關密語</h2>
+      <p>密語在營隊群組裡。輸入一次，這台裝置就會記住。</p>
+      <input type="text" id="passIn" aria-label="通關密語" placeholder="通關密語">
+      <button class="btn" type="submit" id="passBtn">進入</button>
+      <p class="status ${msg ? "bad" : ""}" id="gateMsg">${esc(msg || "")}</p>
+    </form>`;
+  $("#passIn").focus();
+  $("#gate").onsubmit = async e => {
+    e.preventDefault();
+    const v = $("#passIn").value;
+    if (!v.trim()) return;
+    $("#passBtn").disabled = true; $("#gateMsg").className = "status"; $("#gateMsg").textContent = "確認中…";
+    const ok = await tryUnlock(v);
+    if (!ok) renderGate("密語不對喔，再確認一下標點和字。");
+  };
+}
+
+async function tryUnlock(raw){
+  const p = norm(raw);
+  const h = await sha256(p);
+  try{
+    await getDocs(query(collection(fs, "camps/" + h + "/cards"), limit(1)));
+  }catch(err){
+    if (err?.code === "permission-denied") return false;
+    banner("連不上資料庫，請檢查網路後重新整理。"); return false;
+  }
+  pass = p; base = "camps/" + h; unlocked = true; lsSet(p);
+  try{ admin = (await getDoc(doc(fs, P("admins/" + uid)))).exists(); }catch{ admin = false; }
+  startListeners();
+  $("#addToggle").hidden = false; $("#foot").hidden = false;
+  renderFoot(); render();
+  return true;
+}
+
+function startListeners(){
+  unsubCards = onSnapshot(collection(fs, P("cards")), s => {
+    cards = s.docs.map(d => ({id: d.id, ...d.data()})); ready = true;
+    if (view.name === "list") safeList();
+    else if (!cards.some(c => c.id === view.id)) renderCard();
+    else if (!editing) { const cnt = $("#count"); if (cnt) renderNotes(); }
+  }, err => banner("讀不到卡片，請重新整理頁面。"));
+}
+
+/* ---------- footer & admin ---------- */
+function renderFoot(){
+  $("#footInfo").textContent = admin ? "你是管理員" : "";
+  const slot = $("#adminSlot");
+  slot.innerHTML = admin ? "" : `<button class="linkbtn" id="adminOpen" type="button">管理員登入</button>`;
+  if (!admin) $("#adminOpen").onclick = () => {
+    slot.innerHTML = `<form class="adminlogin" id="adminForm"><input type="password" id="adminPw" placeholder="管理員密碼" aria-label="管理員密碼"><button class="btn small" type="submit">登入</button><span id="adminMsg"></span></form>`;
+    $("#adminPw").focus();
+    $("#adminForm").onsubmit = async e => {
+      e.preventDefault();
+      try{
+        await setDoc(doc(fs, P("admins/" + uid)), {pw: $("#adminPw").value, t: Date.now()});
+        admin = true; renderFoot(); render();
+      }catch{ $("#adminMsg").textContent = "密碼不對。"; }
+    };
+  };
+  renderAdminBar();
+}
+
+function renderAdminBar(){
+  const bar = $("#adminbar");
+  if (!admin || view.name !== "list"){ bar.innerHTML = ""; return; }
+  bar.innerHTML = `<div class="adminbar"><b>管理員</b>
+    <button class="tbtn" id="importBtn" type="button">匯入工人名單（63 人）</button>
+    <button class="tbtn" id="exportBtn" type="button">匯出所有留言（Excel 可開）</button>
+    <span id="adminStatus"></span></div>`;
+  $("#importBtn").onclick = importRoster;
+  $("#exportBtn").onclick = exportCsv;
+}
+
+async function decryptRoster(){
+  const bytes = Uint8Array.from(atob(ROSTER_ENC), c => c.charCodeAt(0));
+  const salt = bytes.slice(0,16), iv = bytes.slice(16,28), ct = bytes.slice(28);
+  const k0 = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey({name:"PBKDF2", salt, iterations:150000, hash:"SHA-256"}, k0, {name:"AES-GCM", length:256}, false, ["decrypt"]);
+  return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM", iv}, key, ct)));
+}
+
+async function importRoster(){
+  const st = $("#adminStatus"); st.textContent = "匯入中…";
+  try{
+    const roster = await decryptRoster();
+    const have = new Set(cards.map(c => c.id));
+    const todo = roster.filter(r => !have.has(r.id));
+    if (!todo.length){ st.textContent = "名單上的人都已經有卡了。"; return; }
+    const b = writeBatch(fs);
+    todo.forEach(r => b.set(doc(fs, P("cards/" + r.id)), {name:r.name, group:r.group, team:r.team, t:r.t, by:uid, n:0}));
+    await b.commit();
+    st.textContent = `貼上了 ${todo.length} 張卡。`;
+  }catch(err){ st.textContent = "匯入失敗：" + (err?.code || err?.message || "未知錯誤"); }
+}
+
+async function exportCsv(){
+  const st = $("#adminStatus"); st.textContent = "整理中…";
+  try{
+    const s = await getDocs(collection(fs, P("notes")));
+    const byId = Object.fromEntries(cards.map(c => [c.id, c]));
+    const rows = [["組別","營名","本名・系","留言","署名","有附圖","時間"]];
+    s.docs.map(d => d.data()).sort((a,b) => (byId[a.card]?.t ?? 0) - (byId[b.card]?.t ?? 0) || a.t - b.t).forEach(n => {
+      const c = byId[n.card] || {};
+      rows.push([c.team||"", c.name||"(已刪除的卡)", c.group||"", n.text||"", n.sign||"(匿名)", (n.s && n.s.length) ? "有" : "", new Date(n.t).toLocaleString("zh-TW")]);
+    });
+    const csv = "﻿" + rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"}));
+    a.download = "背感卡留言.csv"; document.body.appendChild(a); a.click(); a.remove();
+    st.textContent = `匯出了 ${rows.length - 1} 則留言。`;
+  }catch(err){ st.textContent = "匯出失敗：" + (err?.code || "未知錯誤"); }
+}
+
+/* ---------- list view ---------- */
+function miniCard(c){
+  const n = countFor(c);
+  return `<button class="mini" type="button" data-card="${esc(c.id)}" style="transform:rotate(${tilt(c.id)}deg)">
+    <span class="tape"></span>
+    <span class="mname">${esc(c.name)}</span>
+    ${c.group ? `<span class="mmeta">${esc(c.group)}</span>` : ""}
+    ${c.team ? `<span class="mmeta">${esc(c.team)}</span>` : ""}
+    <span class="mcount">${n ? `<b>${n}</b> 則留言` : `<span class="zero">還沒有人寫</span>`}</span>
+  </button>`;
+}
+function teamRank(k){ const i = TEAMS.indexOf(k); return i < 0 ? 99 : i; }
+
+function renderList(){
+  renderAdminBar();
+  const v = $("#view");
+  let list = cards.slice();
+  const q = query_.trim().toLowerCase();
+  if (q) list = list.filter(c => (c.name + " " + (c.group||"") + " " + (c.team||"")).toLowerCase().includes(q));
+  if (sortBy === "name") list.sort((a,b) => a.name.localeCompare(b.name, "zh-Hant"));
+  else if (sortBy === "few") list.sort((a,b) => countFor(a) - countFor(b) || a.name.localeCompare(b.name,"zh-Hant"));
+
+  let html = "";
+  if (showAdd) html += `
+    <form class="addbox" id="addForm" autocomplete="off">
+      <label>營名（會寫在卡上）<input type="text" id="addName" maxlength="20" placeholder="例如：小鹿" required></label>
+      <label>本名／系（選填）<input type="text" id="addGroup" maxlength="20" placeholder="例如：王小明 · 電子"></label>
+      <button class="btn" type="submit">貼上去</button>
+      ${addErr ? `<p class="err">${esc(addErr)}</p>` : ""}
+    </form>`;
+  html += `<div class="tools">
+      <input type="text" id="search" placeholder="搜尋營名、本名或組別" value="${esc(query_)}" aria-label="搜尋">
+      <div class="seg" role="group" aria-label="排序">
+        <button type="button" data-sort="team" aria-pressed="${sortBy==="team"}">依組別</button>
+        <button type="button" data-sort="name" aria-pressed="${sortBy==="name"}">依名字</button>
+        <button type="button" data-sort="few" aria-pressed="${sortBy==="few"}">最少人寫的先</button>
+      </div>
+    </div>`;
+  if (!ready) html += `<div class="empty"><div class="big">正在把卡片貼上來…</div></div>`;
+  else if (!cards.length) html += `<div class="empty"><div class="big">牆上還沒有任何一張卡</div>${admin ? "按上面的「匯入工人名單」把大家的卡一次貼上去。" : "按右上角「貼上一張新卡」，先把自己的名字貼上去。"}</div>`;
+  else if (!list.length) html += `<div class="empty"><div class="big">找不到「${esc(query_)}」</div>換個字試試，或幫他貼一張新卡。</div>`;
+  else if (sortBy === "team"){
+    const groups = {};
+    list.forEach(c => (c.team||"其他").split("／").forEach(k => (groups[k] = groups[k] || []).push(c)));
+    html += Object.keys(groups).sort((a,b) => teamRank(a) - teamRank(b)).map(k => {
+      const arr = groups[k].sort((a,b) => (a.t||0) - (b.t||0));
+      const done = arr.filter(c => countFor(c)).length;
+      return `<section class="team"><h2 class="teamh">${esc(k)}<span>${arr.length} 人 · ${done} 張有人寫了</span></h2><div class="grid">${arr.map(miniCard).join("")}</div></section>`;
+    }).join("");
+  }
+  else html += `<div class="grid">${list.map(miniCard).join("")}</div>`;
+  v.innerHTML = html;
+
+  $("#search").addEventListener("input", e => { query_ = e.target.value; const pos = e.target.selectionStart; renderList(); const ns = $("#search"); ns.focus(); try{ ns.setSelectionRange(pos,pos); }catch{} });
+  v.querySelectorAll("[data-sort]").forEach(b => b.onclick = () => { sortBy = b.dataset.sort; renderList(); });
+  v.querySelectorAll("[data-card]").forEach(b => b.onclick = () => openCard(b.dataset.card));
+  const f = $("#addForm");
+  if (f){ $("#addName").focus(); f.onsubmit = addCard; }
+}
+function safeList(){
+  const a = document.activeElement?.id;
+  if (a === "addName" || a === "addGroup" || a === "search" || a === "adminPw"){ clearTimeout(safeList.t); safeList.t = setTimeout(safeList, 1500); return; }
+  renderList();
+}
+
+async function addCard(e){
+  e.preventDefault();
+  const name = $("#addName").value.trim(), group = $("#addGroup").value.trim();
+  if (!name){ addErr = "請先寫營名。"; renderList(); return; }
+  if (cards.some(c => c.name === name)){ addErr = `已經有「${name}」的卡了，直接點開它就好。`; renderList(); return; }
+  const ref = doc(collection(fs, P("cards")));
+  try{
+    await setDoc(ref, {name, group, team:"", t: Date.now(), by: uid, n: 0});
+    showAdd = false; addErr = ""; query_ = "";
+    openCard(ref.id);
+  }catch{ addErr = "沒貼上去，請再試一次。"; renderList(); }
+}
+
+/* ---------- card view ---------- */
+function openCard(id){
+  view = {name:"card", id};
+  pendingDel = null; editing = false; cardDelAsk = false; notes = [];
+  draft = {text:"", sign:draft.sign, pen:draft.pen, size:draft.size, strokes:[], drawOpen:false, status:"", bad:false, busy:false};
+  if (unsubNotes) unsubNotes();
+  unsubNotes = onSnapshot(query(collection(fs, P("notes")), where("card","==",id)), s => {
+    notes = s.docs.map(d => ({id: d.id, ...d.data()}));
+    if (view.name === "card") renderNotes();
+  }, () => {});
+  $("#addToggle").hidden = true;
+  render();
+  window.scrollTo({top:0});
+}
+function closeCard(){
+  if (unsubNotes){ unsubNotes(); unsubNotes = null; }
+  view = {name:"list"}; $("#addToggle").hidden = false; render();
+}
+
+function renderCard(){
+  renderAdminBar();
+  const c = cards.find(x => x.id === view.id);
+  const v = $("#view");
+  if (!c){ v.innerHTML = `<div class="backbar"><button class="btn ghost small" id="back" type="button">← 所有背感卡</button></div><div class="empty"><div class="big">這張卡已經被拿下來了</div></div>`; $("#back").onclick = closeCard; return; }
+  v.innerHTML = `
+    <div class="backbar"><button class="btn ghost small" id="back" type="button">← 所有背感卡</button>
+      ${admin ? `<button class="btn ghost small" id="editCard" type="button">${editing ? "收起編輯" : "編輯這張卡"}</button>` : ""}</div>
+    <div class="layout">
+      <article class="sheet" aria-label="${esc(c.name)} 的背感卡">
+        <span class="tape l"></span><span class="tape"></span><span class="tape r"></span>
+        ${admin && editing ? `<form class="cardedit" id="cardEdit">
+            <div class="row"><input type="text" id="eName" maxlength="20" value="${esc(c.name)}" aria-label="營名"><input type="text" id="eGroup" maxlength="20" value="${esc(c.group||"")}" aria-label="本名／系"><input type="text" id="eTeam" maxlength="20" value="${esc(c.team||"")}" aria-label="組別"></div>
+            <div class="row"><button class="btn small" type="submit">存檔</button><span class="sp"></span>
+              ${cardDelAsk ? `<span class="lbl">連同上面的留言一起刪掉？</span><button class="btn small danger" type="button" id="cardDelYes">確定刪除</button><button class="tbtn" type="button" id="cardDelNo">算了</button>` : `<button class="tbtn danger" type="button" id="cardDel">刪除這張卡</button>`}
+            </div><p class="status" id="editMsg"></p></form>` : ""}
+        <h2>給 ${esc(c.name)}</h2>
+        <p class="count" id="count"></p>
+        <div class="notes" id="notes"></div>
+      </article>
+      <form class="composer" id="composer" autocomplete="off">
+        <h3>在 ${esc(c.name)} 的背上寫</h3>
+        <div class="pens" role="group" aria-label="筆的顏色">
+          <span class="lbl">筆色</span>
+          ${PENS.map((p,i) => `<button type="button" class="pen" data-pen="${i}" aria-label="${p.n}色" aria-pressed="${draft.pen===i}" style="background:${p.c}"></button>`).join("")}
+        </div>
+        <textarea id="msg" maxlength="${MAXLEN}" placeholder="想對 ${esc(c.name)} 說的話…" style="color:${PENS[draft.pen].c}">${esc(draft.text)}</textarea>
+        <div class="row">
+          <button type="button" class="tbtn" id="drawToggle" aria-pressed="${draft.drawOpen}">${draft.drawOpen ? "收起畫板" : "✎ 加一張小圖"}</button>
+          <span class="sp"></span><span class="lbl" id="len">${draft.text.length}/${MAXLEN}</span>
+        </div>
+        <div id="drawArea" ${draft.drawOpen ? "" : "hidden"}>
+          <div class="pad"><canvas id="pad" width="${W}" height="${H}"></canvas><div class="hint" id="padHint" ${draft.strokes.length?"hidden":""}>用手指或滑鼠在這裡畫</div></div>
+          <div class="row" style="margin-top:8px">
+            <span class="lbl">粗細</span>
+            <button type="button" class="tbtn" data-size="3" aria-pressed="${draft.size===3}">細</button>
+            <button type="button" class="tbtn" data-size="8" aria-pressed="${draft.size===8}">粗</button>
+            <span class="sp"></span>
+            <button type="button" class="tbtn" id="undo">↶ 上一步</button>
+            <button type="button" class="tbtn" id="clear">清空</button>
+          </div>
+        </div>
+        <input type="text" id="sign" maxlength="20" placeholder="署名（留空就是匿名）" value="${esc(draft.sign)}">
+        <button class="btn" type="submit" id="post">貼到他背上</button>
+        <p class="status ${draft.bad?"bad":""}" id="status">${esc(draft.status)}</p>
+      </form>
+    </div>`;
+  $("#back").onclick = closeCard;
+  if (admin){
+    $("#editCard").onclick = () => { editing = !editing; cardDelAsk = false; renderCard(); };
+    const ef = $("#cardEdit");
+    if (ef){
+      ef.onsubmit = async e => {
+        e.preventDefault();
+        const name = $("#eName").value.trim();
+        if (!name){ $("#editMsg").textContent = "營名不能空白。"; return; }
+        try{ await updateDoc(doc(fs, P("cards/" + c.id)), {name, group: $("#eGroup").value.trim(), team: $("#eTeam").value.trim()}); editing = false; renderCard(); }
+        catch{ $("#editMsg").textContent = "沒存到，請再試一次。"; }
+      };
+      const d = $("#cardDel"); if (d) d.onclick = () => { cardDelAsk = true; renderCard(); };
+      const dn = $("#cardDelNo"); if (dn) dn.onclick = () => { cardDelAsk = false; renderCard(); };
+      const dy = $("#cardDelYes"); if (dy) dy.onclick = async () => {
+        try{
+          const b = writeBatch(fs);
+          notes.forEach(n => b.delete(doc(fs, P("notes/" + n.id))));
+          b.delete(doc(fs, P("cards/" + c.id)));
+          await b.commit(); closeCard();
+        }catch{ $("#editMsg").textContent = "沒刪掉，請再試一次。"; }
+      };
+    }
+  }
+  const msg = $("#msg");
+  msg.oninput = () => { draft.text = msg.value; $("#len").textContent = `${msg.value.length}/${MAXLEN}`; };
+  $("#sign").oninput = e => draft.sign = e.target.value;
+  v.querySelectorAll("[data-pen]").forEach(b => b.onclick = () => {
+    draft.pen = +b.dataset.pen;
+    v.querySelectorAll("[data-pen]").forEach(x => x.setAttribute("aria-pressed", x === b));
+    msg.style.color = PENS[draft.pen].c;
+  });
+  v.querySelectorAll("[data-size]").forEach(b => b.onclick = () => {
+    draft.size = +b.dataset.size;
+    v.querySelectorAll("[data-size]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  });
+  $("#drawToggle").onclick = () => {
+    draft.drawOpen = !draft.drawOpen;
+    $("#drawArea").hidden = !draft.drawOpen;
+    const t = $("#drawToggle"); t.setAttribute("aria-pressed", draft.drawOpen);
+    t.textContent = draft.drawOpen ? "收起畫板" : "✎ 加一張小圖";
+  };
+  $("#undo").onclick = () => { draft.strokes.pop(); paintPad(); };
+  $("#clear").onclick = () => { draft.strokes = []; paintPad(); };
+  setupPad();
+  $("#composer").onsubmit = postNote;
+  renderNotes();
+}
+
+function renderNotes(){
+  const box = $("#notes"); if (!box) return;
+  const list = notes.slice().sort((a,b) => a.t - b.t);
+  $("#count").textContent = list.length ? `${list.length} 則留言` : "";
+  if (!list.length){ box.innerHTML = `<div class="blank">還是一張白紙。<br>當第一個寫的人吧。</div>`; return; }
+  box.innerHTML = list.map(n => {
+    const col = PENS[n.pen] ? PENS[n.pen].c : PENS[0].c;
+    const canDel = admin || (uid && n.author === uid);
+    const hasDraw = Array.isArray(n.s) && n.s.length;
+    return `<div class="note" style="color:${col};transform:rotate(${tilt(n.id)/1.5}deg)">
+      ${canDel ? `<button class="del" type="button" data-del="${esc(n.id)}" aria-label="刪掉這則">刪掉</button>` : ""}
+      ${n.text ? `<p>${esc(n.text)}</p>` : ""}
+      ${hasDraw ? `<canvas data-ink="${esc(n.id)}" width="${W}" height="${H}" aria-label="手繪圖"></canvas>` : ""}
+      ${n.sign ? `<span class="sig">— ${esc(n.sign)}</span>` : ""}
+      ${pendingDel === n.id ? `<div class="confirm">確定刪掉？<button type="button" class="yes" data-yes="${esc(n.id)}">刪掉</button><button type="button" data-no="1">算了</button></div>` : ""}
+    </div>`;
+  }).join("");
+  const byId = Object.fromEntries(list.map(n => [n.id, n]));
+  box.querySelectorAll("canvas[data-ink]").forEach(cv => drawStrokes(cv.getContext("2d"), byId[cv.dataset.ink].s));
+  box.querySelectorAll("[data-del]").forEach(b => b.onclick = () => { pendingDel = b.dataset.del; renderNotes(); });
+  box.querySelectorAll("[data-no]").forEach(b => b.onclick = () => { pendingDel = null; renderNotes(); });
+  box.querySelectorAll("[data-yes]").forEach(b => b.onclick = () => deleteNote(b.dataset.yes));
+}
+
+async function deleteNote(id){
+  pendingDel = null;
+  try{
+    const b = writeBatch(fs);
+    b.delete(doc(fs, P("notes/" + id)));
+    b.update(doc(fs, P("cards/" + view.id)), {n: increment(-1)});
+    await b.commit();
+  }catch{ setStatus("沒刪掉，請再試一次。", true); }
+  renderNotes();
+}
+
+/* ---------- drawing ---------- */
+function drawStrokes(ctx, strokes){
+  ctx.clearRect(0,0,W,H);
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+  for (const s of strokes || []){
+    const p = s.p || []; if (p.length < 2) continue;
+    ctx.strokeStyle = s.c; ctx.lineWidth = s.w;
+    ctx.beginPath(); ctx.moveTo(p[0], p[1]);
+    if (p.length === 2) ctx.lineTo(p[0] + .1, p[1]);
+    for (let i = 2; i < p.length; i += 2) ctx.lineTo(p[i], p[i+1]);
+    ctx.stroke();
+  }
+}
+function paintPad(){
+  const cv = $("#pad"); if (!cv) return;
+  drawStrokes(cv.getContext("2d"), draft.strokes);
+  $("#padHint").hidden = draft.strokes.length > 0;
+}
+function setupPad(){
+  const cv = $("#pad"); if (!cv) return;
+  let cur = null;
+  const pt = e => { const r = cv.getBoundingClientRect(); return [Math.round((e.clientX - r.left) / r.width * W), Math.round((e.clientY - r.top) / r.height * H)]; };
+  cv.onpointerdown = e => {
+    e.preventDefault(); cv.setPointerCapture(e.pointerId);
+    cur = {c: PENS[draft.pen].c, w: draft.size, p: pt(e)};
+    draft.strokes.push(cur); paintPad();
+  };
+  cv.onpointermove = e => {
+    if (!cur) return;
+    const [x,y] = pt(e), n = cur.p.length;
+    if (Math.abs(x - cur.p[n-2]) + Math.abs(y - cur.p[n-1]) < 2) return;
+    cur.p.push(x, y);
+    const ctx = cv.getContext("2d");
+    ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = cur.c; ctx.lineWidth = cur.w;
+    ctx.beginPath(); ctx.moveTo(cur.p[n-2], cur.p[n-1]); ctx.lineTo(x, y); ctx.stroke();
+  };
+  cv.onpointerup = cv.onpointercancel = () => { cur = null; };
+  paintPad();
+}
+
+/* ---------- posting ---------- */
+function setStatus(msg, bad){ draft.status = msg; draft.bad = !!bad; const s = $("#status"); if (s){ s.textContent = msg; s.className = "status" + (bad ? " bad" : ""); } }
+async function postNote(e){
+  e.preventDefault();
+  if (draft.busy) return;
+  const text = draft.text.trim();
+  const strokes = draft.strokes.filter(s => s.p.length >= 2);
+  if (!text && !strokes.length){ setStatus("先寫點什麼或畫點什麼吧。", true); return; }
+  if (JSON.stringify(strokes).length > 800000){ setStatus("這張圖太複雜了，按「上一步」少畫幾筆再貼。", true); return; }
+  draft.busy = true; $("#post").disabled = true; setStatus("貼上去中…");
+  try{
+    const b = writeBatch(fs);
+    b.set(doc(collection(fs, P("notes"))), {card: view.id, text, sign: draft.sign.trim(), pen: draft.pen, s: strokes, author: uid, t: Date.now()});
+    b.update(doc(fs, P("cards/" + view.id)), {n: increment(1)});
+    await b.commit();
+    draft.text = ""; draft.strokes = []; draft.busy = false;
+    $("#msg").value = ""; $("#len").textContent = `0/${MAXLEN}`; paintPad();
+    $("#post").disabled = false;
+    setStatus("貼好了！");
+  }catch(err){
+    draft.busy = false; $("#post").disabled = false;
+    setStatus(err?.code === "resource-exhausted" ? "今天的免費額度用完了，明天再試，或請管理員看一下。" : "沒貼上去，請再試一次。", true);
+  }
+}
+
+/* ---------- boot ---------- */
+function render(){ if (!unlocked) return renderGate(); if (view.name === "card") renderCard(); else renderList(); }
+$("#addToggle").onclick = () => { showAdd = !showAdd; addErr = ""; renderList(); };
+$("#lockBtn").onclick = () => { lsSet(""); location.reload(); };
+
+if (!firebaseConfig || !firebaseConfig.apiKey || firebaseConfig.apiKey.startsWith("貼上")){
+  banner("還沒設定 Firebase：請照 README 的步驟，把設定貼進 firebase-config.js。");
+} else {
+  const app = initializeApp(firebaseConfig);
+  fs = getFirestore(app);
+  const auth = getAuth(app);
+  $("#view").innerHTML = `<div class="empty"><div class="big">準備中…</div></div>`;
+  onAuthStateChanged(auth, async u => {
+    if (!u || uid) return;
+    uid = u.uid;
+    const saved = lsGet();
+    if (saved && await tryUnlock(saved)) return;
+    lsSet(""); renderGate();
+  });
+  signInAnonymously(auth).catch(() => banner("登入失敗：請確認 Firebase 已開啟「匿名」登入方式。"));
+}
+</script>
+
+</body>
+</html>
